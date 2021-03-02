@@ -1,0 +1,53 @@
+name: Setup Dasel
+description: Install and setup a version of the dasel command line tool
+inputs:
+  version:
+    required: false
+    description: The version of dasel to install
+    default: latest
+outputs:
+  version-installed:
+    description: The version of dasel that was installed
+    value: ${{ steps.get-version.outputs.version-installed }}
+runs:
+  using: composite
+  steps:
+    - id: get-os
+      shell: bash
+      run: |
+        if [[ "${{ runner.os }}" == "Linux" ]]; then
+          echo "::set-output name=download-extension::linux_amd64"
+        elif [[ "${{ runner.os }}" == "Windows" ]]; then
+          echo "::set-output name=download-extension::windows_386.exe"
+        elif [[ "${{ runner.os }}" == "macOS" ]]; then
+          echo "::set-output name=download-extension::darwin_amd64"
+        fi
+    - id: get-version
+      shell: bash
+      run: |
+        if [[ "${{ inputs.version }}" == "latest" ]]; then
+          version=$(curl -s https://api.github.com/repos/tomwright/dasel/releases/latest | jq -r '.tag_name')
+        else
+          version="${{ inputs.version }}"
+        fi
+
+        echo "Installing dasel $version..."
+
+        exec_name="dasel_${{ steps.get-os.outputs.download-extension }}"
+        dest_cli="$RUNNER_TEMP/dasel-cli/"
+        mkdir -p "$dest_cli"
+
+        filename="dasel"
+
+        if [[ "${{ runner.os }}" == "Windows" ]]; then
+          filename="$filename.exe"
+        fi
+
+        curl -L "https://github.com/TomWright/dasel/releases/download/$version/$exec_name" --output "$dest_cli/$filename"
+        echo "::set-output name=version-installed::$version"
+
+        if [[ "${{ runner.os }}" != "Windows" ]]; then
+          chmod +x "$dest_cli/$filename"
+        fi
+
+        echo "$dest_cli" >> $GITHUB_PATH
