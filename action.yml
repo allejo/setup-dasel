@@ -28,7 +28,11 @@ runs:
         if [[ "${{ inputs.version }}" == "latest" ]]; then
           version=$(curl -s https://api.github.com/repos/tomwright/dasel/releases/latest | jq -r '.tag_name')
         else
-          version="${{ inputs.version }}"
+          version="v$( echo '${{ inputs.version }}' | sed s/^v//)"
+        fi
+
+        if [[ "$version" == "null" ]]; then
+          exit 1;
         fi
 
         echo "Installing dasel $version..."
