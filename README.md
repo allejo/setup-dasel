@@ -7,7 +7,7 @@
 ## Usage
 
 ```yaml
-- name: Send IRC notification
+- name: Setup `dasel` CLI
   uses: allejo/setup-dasel@v1
 ```
 
