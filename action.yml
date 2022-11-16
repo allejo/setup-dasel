@@ -1,5 +1,6 @@
 name: Setup Dasel
 description: Install and setup a version of the dasel command line tool
+
 inputs:
   version:
     required: false
@@ -9,19 +10,29 @@ outputs:
   version-installed:
     description: The version of dasel that was installed
     value: ${{ steps.get-version.outputs.version-installed }}
+
 runs:
   using: composite
   steps:
     - id: get-os
       shell: bash
       run: |
-        if [[ "${{ runner.os }}" == "Linux" ]]; then
-          echo "::set-output name=download-extension::linux_amd64"
-        elif [[ "${{ runner.os }}" == "Windows" ]]; then
-          echo "::set-output name=download-extension::windows_386.exe"
-        elif [[ "${{ runner.os }}" == "macOS" ]]; then
-          echo "::set-output name=download-extension::darwin_amd64"
-        fi
+        case ${{ runner.os }} in
+          Linux)
+            echo "download-extension=linux_amd64" >> $GITHUB_OUTPUT
+          ;;
+          Windows)
+            echo "download-extension=windows_386.exe" >> $GITHUB_OUTPUT
+          ;;
+          macOS)
+            echo "download-extension=darwin_amd64" >> $GITHUB_OUTPUT
+          ;;
+          *)
+            echo "Unsupported OS"
+            exit 1
+          ;;
+        esac
+
     - id: get-version
       shell: bash
       run: |
@@ -38,8 +49,8 @@ runs:
         echo "Installing dasel $version..."
 
         exec_name="dasel_${{ steps.get-os.outputs.download-extension }}"
-        dest_cli="$RUNNER_TEMP/dasel-cli/"
-        mkdir -p "$dest_cli"
+        dest_cli="${RUNNER_TEMP}/dasel-cli/"
+        mkdir -p "${dest_cli}"
 
         filename="dasel"
 
@@ -48,10 +59,10 @@ runs:
         fi
 
         curl -L "https://github.com/TomWright/dasel/releases/download/$version/$exec_name" --output "$dest_cli/$filename"
-        echo "::set-output name=version-installed::$version"
+        echo "version-installed=${version}" >> $GITHUB_OUTPUTS
 
         if [[ "${{ runner.os }}" != "Windows" ]]; then
-          chmod +x "$dest_cli/$filename"
+          chmod +x "${dest_cli}/${filename}"
         fi
 
-        echo "$dest_cli" >> $GITHUB_PATH
+        echo "${dest_cli}" >> $GITHUB_PATH
