@@ -58,7 +58,7 @@ runs:
           filename="$filename.exe"
         fi
 
-        curl -L "https://github.com/TomWright/dasel/releases/download/$version/$exec_name" --output "$dest_cli/$filename"
+        curl -L "https://github.com/TomWright/dasel/releases/download/${version}/${exec_name}" --output "${dest_cli}/${filename}"
         echo "version-installed=${version}" >> $GITHUB_OUTPUTS
 
         if [[ "${{ runner.os }}" != "Windows" ]]; then
