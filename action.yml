@@ -59,7 +59,7 @@ runs:
         fi
 
         curl -L "https://github.com/TomWright/dasel/releases/download/${version}/${exec_name}" --output "${dest_cli}/${filename}"
-        echo "version-installed=${version}" >> $GITHUB_OUTPUTS
+        echo "version-installed=${version}" >> $GITHUB_OUTPUT
 
         if [[ "${{ runner.os }}" != "Windows" ]]; then
           chmod +x "${dest_cli}/${filename}"
